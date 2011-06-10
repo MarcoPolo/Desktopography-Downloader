@@ -8,7 +8,8 @@ import StringIO
 import urllib2
 
 
-site="http://desk10.customize.org/exhibitions/6"
+basesite = "http://desk10.customize.org/exhibitions/"
+site="http://desk10.customize.org/exhibitions/5"
 dlsite = "http://desk10.customize.org/media/"
 dldirec = "/home/marco/wallpapers/"
 
@@ -30,7 +31,7 @@ def getWallpaperLocations():
     numberLocations = []
     for line in siteInfo:
         if(line.find('/wallpapers')!=-1):
-            #print line #this is debugging should be removed later
+            print line #this is debugging should be removed later
             locations.append(line)
     for location in locations:
         m = re.search('(?<=(wallpapers/))\w+', location)
@@ -43,6 +44,7 @@ def getWallpaperInfo(wallpaperNumber,lineIdentifier, regEX=None):
     if (regEX == None):
         regEX=lineIdentifier
     curl = pycurl.Curl()
+    print site
     curl.setopt(pycurl.URL, site+'/wallpapers/'+str(wallpaperNumber))
     string = StringIO.StringIO() 
     curl.setopt(pycurl.WRITEFUNCTION, string.write)
@@ -51,27 +53,36 @@ def getWallpaperInfo(wallpaperNumber,lineIdentifier, regEX=None):
     siteInfo = siteInfo.split("\n")
     locations = []
     fileLocations = []
+    print site+'/wallpapers/'+str(wallpaperNumber) 
     for line in siteInfo:
         if(line.find(lineIdentifier)!=-1):
             #print line #this is debugging should be removed later
             locations.append(line)
-    for location in locations:
-        m = re.search('(?<=('+regEX+'))\w+', location)
-        fileLocations.append(m.group(0))
+    print locations
+    try:
+        for location in locations:
+            m = re.search('(?<=('+regEX+'))\w+', location)
+            fileLocations.append(m.group(0))
+    except :
+        print "There was an error in the regEX search, probably from the title. It's okay I caught it, carry on. \n Check this: " + regEX
+        fileLocations=['','']
     #print fileLocations
     return fileLocations
 
 def getWallpaperName(wallpaperNumber):
-    name = getWallpaperInfo(wallpaperNumber, '<h2 id="title"', '>  ')
+    name = getWallpaperInfo(wallpaperNumber, '<h2 id="title"', 'le">  ')
     return name[0]
 
 def getWallpaperDownloadLocations(wallpaperNumber):
     dlLocations = getWallpaperInfo(wallpaperNumber, 'value="/media/')
+    print dlLocations
     return dlLocations
 
 def downloadWallpaper(wallpaperNumber):
+    print "getting wallpaper number " + wallpaperNumber + " from exhibit" + site[-1]
     name = getWallpaperName(wallpaperNumber)
     #This is 0 becuase I want the highest quality one, nothing but the best
+    print site
     location = getWallpaperDownloadLocations(wallpaperNumber)[0]
     wallpaperFile = urllib2.urlopen(dlsite+location)
     # the wb means write and make it binary so it stores data and not just
@@ -81,9 +92,12 @@ def downloadWallpaper(wallpaperNumber):
     output.close()
 
 def downloadAllWallpapers():
-    numberLocations = getWallpaperLocations()
-    for number in numberLocations:
-        downloadWallpaper(number)
+    for exhibit in range(4):
+        global site
+        site = basesite + str(exhibit+1)
+        numberLocations = getWallpaperLocations()
+        for number in numberLocations:
+            downloadWallpaper(number)
 if __name__=="__main__":
     print "Hi There welcome Python Desktopography wallpaper downloader! v1 :D"
     print "A wallpaper DLer written in fewer than 100 lines of code, Sexy!"
