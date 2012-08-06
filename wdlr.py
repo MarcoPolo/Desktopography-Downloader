@@ -8,9 +8,9 @@ import StringIO
 import urllib2
 
 
-basesite = "http://desk10.customize.org/exhibitions/"
-site="http://desk10.customize.org/exhibitions/5"
-dlsite = "http://desk10.customize.org/media/"
+basesite = "http://desktopography.net/exhibitions/"
+site="http://desktopography.net/exhibitions/5"
+dlsite = "http://desktopography.net//media/"
 dldirec = "/home/marco/wallpapers/"
 
 
@@ -92,7 +92,7 @@ def downloadWallpaper(wallpaperNumber):
     output.close()
 
 def downloadAllWallpapers():
-    for exhibit in range(4):
+    for exhibit in range(5):
         global site
         site = basesite + str(exhibit+1)
         numberLocations = getWallpaperLocations()
